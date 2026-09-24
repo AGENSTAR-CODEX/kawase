@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#123e48">
+<title>くらしの通貨換算</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#17343c;background:#edf3f4;font-synthesis:none}*{box-sizing:border-box}body{margin:0;padding:32px 16px}main{max-width:580px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}h1{font-size:24px;margin:0;letter-spacing:.04em}.eyebrow{font-size:12px;letter-spacing:.18em;color:#52717a;margin:0 0 7px}button,select,input{font:inherit}button,select{cursor:pointer}button{border:1px solid #cbdadd;background:#fff;color:#17343c;border-radius:12px;min-height:44px;padding:8px 14px}button:hover{background:#e4f1f3}button:disabled{opacity:.5;cursor:wait}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e4a239;outline-offset:3px}.panel{background:#fff;border:1px solid #d4e1e4;border-radius:22px;overflow:hidden;box-shadow:0 12px 40px #153d4810}.status{padding:17px 20px;border-bottom:1px solid #e0e9eb;font-size:14px;color:#4b6972;line-height:1.6}.status strong{color:#17343c}.row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:19px 20px;border-bottom:1px solid #e0e9eb;align-items:center}.row.active{background:#123e48;color:#fff}.currency{display:flex;align-items:center;gap:9px}.flag{font-size:27px}.currency select{width:95px;border:0;background:transparent;color:inherit;font-size:21px;font-weight:650;padding:4px 0}.currency option{color:#17343c;background:white}.name{font-size:12px;margin-top:4px;opacity:.75}.amount{width:100%;text-align:right;min-width:0;border:1px solid #d2dfe2;border-radius:11px;background:#f4f8f9;color:#17343c;padding:11px 12px;font-size:clamp(21px,5vw,30px);font-variant-numeric:tabular-nums}.active .amount{background:#d4f3f4;border-color:#9ad4d9}.tag{font-size:12px;text-align:right;margin-top:5px;min-height:16px;opacity:.8}.tools{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 20px;font-size:14px}.tools select{border:1px solid #cbdadd;border-radius:8px;padding:6px;background:white;color:#17343c}.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.keypad button{height:65px;font-size:26px;box-shadow:0 3px 0 #d2e0e3}.keypad .action{font-size:17px;background:#dcebee}.keypad .clear{background:#f7e8dd;color:#854322}.keypad .one{grid-row:span 2;height:auto;background:#123e48;color:white;font-size:17px;line-height:1.6}.hint{font-size:14px;line-height:1.8;color:#526e77;margin:18px 3px}a{color:#266d80}#error{color:#9c3e24;font-size:14px;min-height:20px;margin:10px 3px}footer{font-size:12px;color:#607b83;line-height:1.8;margin-top:22px}noscript{color:#9c3e24}@media(max-width:400px){body{padding:20px 12px}.row{grid-template-columns:120px minmax(0,1fr);padding:16px 12px;gap:8px}.currency{gap:5px}.flag{font-size:23px}.currency select{width:83px;font-size:19px}h1{font-size:21px}.tools{padding:14px 12px}.keypad button{height:59px}.keypad .one{height:auto}}
+</style>
+</head>
+<body><main>
+<header><div><p class="eyebrow">LIVE CURRENCY</p><h1>くらしの通貨換算</h1></div><button id="refresh" aria-label="最新レートを取得">↻ 更新</button></header>
+<details id="settings" style="margin-bottom:18px"><summary>リアルタイムレートの設定</summary><p class="hint"><a href="https://twelvedata.com/register" target="_blank" rel="noopener noreferrer">Twelve Dataで無料登録</a>し、APIキーを入力してください。キーはこのブラウザーだけに保存し、レート取得時にTwelve Dataへ送信します。</p><form id="keyForm"><label for="apiKey">APIキー</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" style="width:100%;padding:12px;margin:8px 0;border:1px solid #cbdadd;border-radius:8px"><button type="submit">保存して取得</button> <button id="forget" type="button">キーを削除</button></form><p class="hint" id="keyState"></p></details><div class="panel"><div class="status" id="status" role="status">レートを取得しています…</div><div id="rows"></div><div class="tools"><span id="baseLabel">USD を基準に換算</span><label>小数 <select id="digits" aria-label="表示する小数点以下の桁数"><option value="2">2桁</option><option value="4" selected>4桁</option><option value="6">6桁</option></select></label></div></div>
+<div id="error" role="alert"></div>
+<div class="keypad" aria-label="金額入力用テンキー">
+<button class="clear" data-key="clear">C</button><button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+<button class="action" data-key="back" aria-label="末尾の1文字を削除">⌫</button><button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+<button class="one" data-key="one">基準を<br>1 にする</button><button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+<button data-key="0">0</button><button data-key="00">00</button><button data-key=".">.</button>
+</div>
+<p class="hint">換算の基準にしたい通貨の金額を入力してください。<br>通貨名から、表示する通貨も変更できます。</p>
+<footer>レート提供：<a href="https://twelvedata.com/forex" target="_blank" rel="noopener noreferrer">Twelve Data</a>。取得時点の相場で換算します。常時配信ではありません。市場の休場時は直近の価格になります。銀行・カード会社の手数料は含みません。<br>表示中の通貨だけを更新します。入力・基準切り替えは取得回数を消費しません。</footer>
+<noscript>このアプリを使うにはJavaScriptを有効にしてください。</noscript>
+</main>
+<script>
+'use strict';
+const currencies={JPY:['🇯🇵','日本円'],USD:['🇺🇸','米ドル'],CNY:['🇨🇳','人民元'],HKD:['🇭🇰','香港ドル'],EUR:['🇪🇺','ユーロ'],GBP:['🇬🇧','英ポンド'],AUD:['🇦🇺','豪ドル'],KRW:['🇰🇷','韓国ウォン'],SGD:['🇸🇬','シンガポールドル'],THB:['🇹🇭','タイバーツ'],CAD:['🇨🇦','カナダドル'],CHF:['🇨🇭','スイスフラン']};
+const $=id=>document.getElementById(id), storageKey='live-currency-v2';
+let selected=['JPY','USD','CNY','HKD'],base='USD',raw='1',digits=4,snapshot=null,replaceNext=true;
+function validSnapshot(s){return s&&Number.isFinite(s.fetchedAt)&&s.rates?.USD===1&&selected.every(c=>Number.isFinite(s.rates[c])&&s.rates[c]>0&&(c==='USD'||Number.isFinite(s.times?.[c])));}
+try{const s=JSON.parse(localStorage.getItem(storageKey));if(s){if(Array.isArray(s.selected)&&s.selected.length===4&&new Set(s.selected).size===4&&s.selected.every(c=>currencies[c]))selected=s.selected;if(selected.includes(s.base))base=s.base;if([2,4,6].includes(s.digits))digits=s.digits;if(validSnapshot(s.snapshot))snapshot=s.snapshot;}}catch{}
+if(!selected.includes(base))base=selected[0];
+function save(){try{localStorage.setItem(storageKey,JSON.stringify({selected,base,digits,snapshot}));}catch{}}
+function convert(amount,from,to,rates){return amount/rates[from]*rates[to];}
+function format(n){return n.toFixed(digits).replace(/\.?0+$/,'')||'0';}
+function renderRows(){ $('rows').replaceChildren();selected.forEach(c=>{const row=document.createElement('div');row.className='row';row.dataset.currency=c;const left=document.createElement('div');const cur=document.createElement('div');cur.className='currency';const flag=document.createElement('span');flag.className='flag';flag.textContent=currencies[c][0];flag.setAttribute('aria-hidden','true');const select=document.createElement('select');select.setAttribute('aria-label',c+' の表示通貨を変更');Object.entries(currencies).forEach(([code,[,name]])=>{const o=new Option(code,code);o.title=name;o.selected=code===c;o.disabled=selected.includes(code)&&code!==c;select.add(o)});select.addEventListener('change',()=>{selected[selected.indexOf(c)]=select.value;if(base===c)base=select.value;save();renderRows();showStatus();});cur.append(flag,select);const name=document.createElement('div');name.className='name';name.textContent=currencies[c][1];left.append(cur,name);const right=document.createElement('div');const input=document.createElement('input');input.className='amount';input.type='text';input.inputMode='decimal';input.autocomplete='off';input.spellcheck=false;input.setAttribute('aria-label',c+' の金額');input.addEventListener('focus',()=>{if(base!==c){base=c;raw=input.value||'1';save();update()}replaceNext=true;input.select()});input.addEventListener('input',()=>{const normalized=input.value.replace(/[０-９．]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/,/g,'');if(!/^\d{0,12}(\.\d{0,8})?$/.test(normalized)){input.value=raw;$('error').textContent='金額は整数12桁・小数8桁以内で入力してください。';return;}raw=normalized;input.value=raw;replaceNext=false;$('error').textContent='';update()});const tag=document.createElement('div');tag.className='tag';right.append(input,tag);row.append(left,right);$('rows').append(row)});update();}
+function update(){const amount=raw===''||raw==='.'?null:Number(raw);document.querySelectorAll('.row').forEach(row=>{const c=row.dataset.currency;row.classList.toggle('active',c===base);const input=row.querySelector('input');input.value=c===base?raw:(snapshot&&snapshot.rates[base]&&snapshot.rates[c]&&amount!==null?format(convert(amount,base,c,snapshot.rates)):'');input.placeholder=snapshot?'—':'未取得';row.querySelector('.tag').textContent=c===base?'入力中 · 基準通貨':'';});$('baseLabel').textContent=base+' を基準に換算';}
+const keyStorage='live-currency-api-key';
+let apiKey='',lastAttempt=0;
+try{apiKey=localStorage.getItem(keyStorage)||'';lastAttempt=Number(localStorage.getItem('live-currency-last-attempt'))||0;}catch{}
+$('apiKey').value=apiKey;$('settings').open=!apiKey;
+function keyState(message){$('keyState').textContent=message||(apiKey?'APIキー設定済み。無料枠：1日800・1分8クレジット。':'APIキー未設定。');}
+function showStatus(prefix=''){
+ const available=snapshot&&selected.every(c=>snapshot.rates[c]);
+ if(!snapshot){$('status').textContent=prefix+(apiKey?'レート未取得。「更新」を押してください。':'設定からAPIキーを登録してください。');return;}
+ const stamps=selected.filter(c=>c!=='USD').map(c=>snapshot.times[c]).filter(Number.isFinite);
+ const time=stamps.length?new Date(Math.min(...stamps)*1000).toLocaleString('ja-JP'): '不明';
+ $('status').textContent=prefix+'保存済みレートの時刻（最も古いもの）：'+time+' ／ 取得：'+new Date(snapshot.fetchedAt).toLocaleString('ja-JP')+(available?'':' ／ 通貨を変更しました。「更新」で取得してください。');
+}
+async function refresh(){
+ if($('refresh').disabled)return;
+ if(!apiKey){$('settings').open=true;showStatus('APIキー未設定。');return;}
+ if(Date.now()-lastAttempt<60000){showStatus('連続取得を制限しています。前回の取得開始から1分後に再試行してください。');return;}
+ lastAttempt=Date.now();try{localStorage.setItem('live-currency-last-attempt',String(lastAttempt));}catch{}
+ $('refresh').disabled=true;$('keyForm').querySelectorAll('button').forEach(b=>b.disabled=true);document.querySelectorAll('.currency select').forEach(e=>e.disabled=true);
+ $('status').textContent='リアルタイムレートを取得しています…';
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{
+  const quotes=selected.filter(c=>c!=='USD');
+  const results=await Promise.allSettled(quotes.map(async c=>{
+   const url=new URL('https://api.twelvedata.com/exchange_rate');url.searchParams.set('symbol','USD/'+c);url.searchParams.set('apikey',apiKey);
+   const res=await fetch(url,{signal:controller.signal,cache:'no-store',referrerPolicy:'no-referrer'});
+   const data=await res.json();
+   if(res.status===401||data.code===401)throw Error('APIキーを確認してください。');
+   if(res.status===429||data.code===429)throw Error('取得上限に達しました。時間をおいて再試行してください。');
+   if(!res.ok||data.status==='error')throw Error('取得できません。この通貨の対応状況・プラン・APIキーを確認してください。');
+   if(data.symbol!=='USD/'+c||!Number.isFinite(data.rate)||data.rate<=0||!Number.isFinite(data.timestamp)||data.timestamp<=0)throw Error('レートデータを確認できませんでした。');
+   return {c,rate:data.rate,time:data.timestamp};
+  }));
+  const failed=results.find(r=>r.status==='rejected');if(failed)throw failed.reason;
+  const next={rates:{USD:1},times:{},fetchedAt:Date.now()};for(const result of results){const r=result.value;next.rates[r.c]=r.rate;next.times[r.c]=r.time;}
+  if(!validSnapshot(next))throw Error('レートが揃いませんでした。');snapshot=next;save();update();showStatus('取得完了。');
+ }catch(e){showStatus('更新失敗：'+(e.name==='AbortError'?'通信がタイムアウトしました。':e.message==='Failed to fetch'?'通信環境を確認してください。':e.message)+' ');}
+ finally{clearTimeout(timer);$('refresh').disabled=false;$('keyForm').querySelectorAll('button').forEach(b=>b.disabled=false);document.querySelectorAll('.currency select').forEach(e=>e.disabled=false);}
+}
+$('keyForm').addEventListener('submit',e=>{e.preventDefault();apiKey=$('apiKey').value.trim();if(!apiKey){keyState('APIキーを入力してください。');return;}try{localStorage.setItem(keyStorage,apiKey);keyState('APIキーをこのブラウザーに保存しました。');}catch{keyState('保存できないため、この画面を開いている間だけ使用します。');}$('settings').open=false;refresh();});
+$('forget').addEventListener('click',()=>{apiKey='';$('apiKey').value='';try{localStorage.removeItem(keyStorage);}catch{}keyState();showStatus('APIキーを削除しました。');});
+keyState();
+$('refresh').addEventListener('click',refresh);$('digits').value=digits;$('digits').addEventListener('change',e=>{digits=Number(e.target.value);save();update()});
+document.querySelectorAll('[data-key]').forEach(button=>{button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{const key=button.dataset.key;let next=raw;if(key==='clear')next='';else if(key==='one')next='1';else if(key==='back')next=raw.slice(0,-1);else{next=replaceNext?'':raw;if(key==='.'&&next.includes('.'))return;if(key==='.'&&next==='')next='0';next+=key;next=next.replace(/^0+(?=\d)/,'');}if(!/^\d{0,12}(\.\d{0,8})?$/.test(next)){$('error').textContent='金額は整数12桁・小数8桁以内で入力してください。';return;}raw=next;replaceNext=key==='one';$('error').textContent='';update()});});
+renderRows();if(snapshot)showStatus('保存済みの ');refresh();
+</script></body></html>
