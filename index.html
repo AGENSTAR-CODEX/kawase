@@ -8,7 +8,7 @@
 </style>
 </head>
 <body><main>
-<header><div><p class="eyebrow">LIVE CURRENCY</p><img src="file:///tsukalogo.png" width="319" height="105" alt=""/></div><button id="refresh" aria-label="最新レートを取得">↻ 更新</button></header>
+<header><div><p class="eyebrow">LIVE CURRENCY</p><img src="tsukalogo.png" width="319" height="105" alt=""/></div><button id="refresh" aria-label="最新レートを取得">↻ 更新</button></header>
 <details id="settings" style="margin-bottom:18px"><summary>リアルタイムレートの設定</summary><p class="hint"><a href="https://twelvedata.com/register" target="_blank" rel="noopener noreferrer">Twelve Dataで無料登録</a>し、APIキーを入力してください。キーはこのブラウザーだけに保存し、レート取得時にTwelve Dataへ送信します。</p><form id="keyForm"><label for="apiKey">APIキー</label><input id="apiKey" type="password" autocomplete="off" spellcheck="false" style="width:100%;padding:12px;margin:8px 0;border:1px solid #cbdadd;border-radius:8px"><button type="submit">保存して取得</button> <button id="forget" type="button">キーを削除</button></form><p class="hint" id="keyState"></p></details><div class="panel"><div class="status" id="status" role="status">レートを取得しています…</div><div id="rows"></div><div class="tools"><span id="baseLabel">USD を基準に換算</span><label>小数 <select id="digits" aria-label="表示する小数点以下の桁数"><option value="2">2桁</option><option value="4" selected>4桁</option><option value="6">6桁</option></select></label></div></div>
 <div id="error" role="alert"></div>
 <div class="keypad" aria-label="金額入力用テンキー">
